@@ -1,6 +1,7 @@
 from snowflake.snowpark import Session
 import os
 from typing import Optional
+from dotenv import load_dotenv
 
 # Class to store a singleton connection option
 class SnowflakeConnection(object):
@@ -16,6 +17,29 @@ class SnowflakeConnection(object):
 
 # Function to return a configured Snowpark session
 def get_snowpark_session() -> Session:
+    #################################################################
+    # Load .env file
+    load_dotenv()
+
+    # Get configurations from environment variables
+    snowpark_config = {
+        "account": os.getenv("SNOWFLAKE_ACCOUNT"),
+        "user": os.getenv("SNOWFLAKE_USER"),
+        "password": os.getenv("SNOWFLAKE_PASSWORD"),
+        "role": os.getenv("SNOWFLAKE_ROLE"),
+        "warehouse": os.getenv("SNOWFLAKE_WAREHOUSE"),
+        "database": os.getenv("SNOWFLAKE_DATABASE"),
+        "schema": os.getenv("SNOWFLAKE_SCHEMA")
+    }
+
+    # Create Snowflake session
+    session = Session.builder.configs(snowpark_config).create()
+    
+    if session:
+        return session
+    else:
+        raise Exception("Unable to create a Snowpark session")
+    #######################################################################
     # if running in snowflake
     if SnowflakeConnection().connection:
         # Not sure what this does?
